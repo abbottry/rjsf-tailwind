@@ -1,3 +1,5 @@
+import BaseInputTemplate from "../BaseInputTemplate/BaseInputTemplate";
+
 import {
   FormContextType,
   RJSFSchema,
@@ -10,7 +12,9 @@ export function generateTemplates<
   S extends StrictRJSFSchema = RJSFSchema,
   F extends FormContextType = any
 >(): Partial<TemplatesType<T, S, F>> {
-  return {};
+  return {
+    BaseInputTemplate
+  };
 }
 
 export default generateTemplates();

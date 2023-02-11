@@ -1,4 +1,3 @@
-
 import {
   FormContextType,
   RegistryWidgetsType,

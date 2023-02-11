@@ -46,6 +46,7 @@ export default function BaseInputTemplate<
     target: { value },
   }: React.FocusEvent<HTMLInputElement>) => onFocus(id, value);
 
+  // const classNames = [rawErrors.length > 0 ? "is-invalid" : "", type === 'file' ? 'custom-file-label': ""]
   return (
     <>
       <form
@@ -56,7 +57,7 @@ export default function BaseInputTemplate<
         required={required}
         disabled={disabled}
         readOnly={readonly}
-        className={rawErrors.length > 0 ? "is-invalid" : ""}
+        className={rawErrors.length > 0 ? "is-invalid" : "tailwind-form"}
         list={schema.examples ? examplesId<T>(id) : undefined}
         {...inputProps}
         value={value || value === 0 ? value : ""}
