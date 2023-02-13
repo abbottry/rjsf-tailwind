@@ -8,10 +8,6 @@ import {
   WrapIfAdditionalTemplateProps,
 } from "@rjsf/utils";
 
-import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
-import Form from "react-bootstrap/Form";
-
 export default function WrapIfAdditionalTemplate<
   T = any,
   S extends StrictRJSFSchema = RJSFSchema,
@@ -44,37 +40,34 @@ export default function WrapIfAdditionalTemplate<
     );
   }
 
-  const handleBlur = ({ target }: React.FocusEvent<HTMLInputElement>) =>
-    onKeyChange(target.value);
-  const keyId = `${id}-key`;
-
   return (
-    <Row className={classNames} style={style} key={keyId}>
-      <Col xs={5}>
-        <Form.Group>
-          <Form.Label htmlFor={keyId}>{keyLabel}</Form.Label>
-          <Form.Control
-            required={required}
-            defaultValue={label}
+    <div className={classNames} style={style}>
+      <div className="row">
+        <div className="col-xs-5 form-additional">
+          <div className="form-group">
+            <label htmlFor={`${id}-key`}>{keyLabel}</label>
+            <input
+              className="form-control"
+              required={required}
+              type="text"
+              id={`${id}-key`}
+              onBlur={(event) => onKeyChange(event.target.value)}
+              defaultValue={label}
+            />
+          </div>
+        </div>
+        <div className="form-additional form-group col-xs-5">{children}</div>
+        <div className="col-xs-2">
+          <RemoveButton
+            className="array-item-remove btn-block"
+            style={{ border: "0" }}
             disabled={disabled || readonly}
-            id={keyId}
-            name={keyId}
-            onBlur={!readonly ? handleBlur : undefined}
-            type="text"
+            onClick={onDropPropertyClick(label)}
+            uiSchema={uiSchema}
+            registry={registry}
           />
-        </Form.Group>
-      </Col>
-      <Col xs={5}>{children}</Col>
-      <Col xs={2} className="py-4">
-        <RemoveButton
-          iconType="block"
-          className="w-100"
-          disabled={disabled || readonly}
-          onClick={onDropPropertyClick(label)}
-          uiSchema={uiSchema}
-          registry={registry}
-        />
-      </Col>
-    </Row>
+        </div>
+      </div>
+    </div>
   );
 }

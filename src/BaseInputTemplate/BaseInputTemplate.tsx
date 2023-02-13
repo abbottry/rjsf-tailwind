@@ -1,4 +1,5 @@
 import React from "react";
+import classnames from "classnames";
 
 import {
   ariaDescribedByIds,
@@ -49,7 +50,7 @@ export default function BaseInputTemplate<
   // const classNames = [rawErrors.length > 0 ? "is-invalid" : "", type === 'file' ? 'custom-file-label': ""]
   return (
     <>
-      <form
+      <input
         id={id}
         name={id}
         placeholder={placeholder}
@@ -57,7 +58,9 @@ export default function BaseInputTemplate<
         required={required}
         disabled={disabled}
         readOnly={readonly}
-        className={rawErrors.length > 0 ? "is-invalid" : "tailwind-form"}
+        className={classnames("mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-600 focus:ring focus:ring-indigo-200 focus:ring-opacity-50", {
+          "is-invalid": rawErrors.length > 0
+        })}
         list={schema.examples ? examplesId<T>(id) : undefined}
         {...inputProps}
         value={value || value === 0 ? value : ""}
