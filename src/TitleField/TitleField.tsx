@@ -14,7 +14,7 @@ export default function TitleField<
 >({ id, title, uiSchema }: TitleFieldProps<T, S, F>) {
   const uiOptions = getUiOptions<T, S, F>(uiSchema);
   return (
-    <div id={id} className="my-1">
+    <div id={id} className="mb-4">
       <h5>{uiOptions.title || title}</h5>
     </div>
   );

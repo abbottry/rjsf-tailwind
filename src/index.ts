@@ -1,3 +1,5 @@
+import './index.css'
+
 import Form from "./Form/Form";
 
 export { default as Form, generateForm } from "./Form";

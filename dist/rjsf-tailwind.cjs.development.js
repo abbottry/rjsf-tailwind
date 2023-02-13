@@ -408,7 +408,7 @@ function TitleField(_ref) {
   var uiOptions = utils.getUiOptions(uiSchema);
   return React__default["default"].createElement("div", {
     id: id,
-    className: "my-1"
+    className: "mb-4"
   }, React__default["default"].createElement("h5", null, uiOptions.title || title));
 }
 
