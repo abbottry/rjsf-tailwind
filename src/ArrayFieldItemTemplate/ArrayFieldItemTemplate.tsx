@@ -39,7 +39,13 @@ export default function ArrayFieldItemTemplate<
 
   return (
     <div className={`${className} mb-4`}>
-      <div className="flex items-center w-full p-3 py-2.5 rounded text-sm text-left text-slate-700 font-medium bg-slate-100 cursor-pointer" onClick={() => setIsOpen((isOpen) => !isOpen)}>
+      <div 
+        className={classnames("flex items-center w-full p-3 py-2.5 rounded text-sm text-left text-slate-700 font-medium cursor-pointer", {
+          "bg-slate-100": !hasToolbar,
+          "border border-slate-200": hasToolbar
+        })}
+        onClick={() => setIsOpen((isOpen) => !isOpen)}
+      >
         <div className="grow line-clamp-1">{children.props.formData ? children.props.formData.title : "Untitled"}</div>
         <ChevronRightIcon className={`h-5 w-5 ${isOpen ? 'rotate-90 transform' : ''}`} />
       </div>

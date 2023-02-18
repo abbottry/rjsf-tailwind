@@ -9,8 +9,10 @@
     "dist"
   ],
   "scripts": {
-    "start": "dts watch —noClean",
-    "build": "rimraf dist && dts build --rollupTypes --format cjs,esm,umd",
+    "start": "npm-run-all --parallel build:watch tailwind:watch",
+    "build:watch": "dts watch —noClean",
+    "tailwind:watch": "npx tailwindcss -i ./src/index.css -o ./dist/rjsf-tailwind.css --watch",
+    "build": "rimraf dist && dts build --rollupTypes --format cjs,esm,umd && npx tailwindcss -i ./src/index.css -o ./dist/rjsf-tailwind.css",
     "cs-check": "prettier -l \"{src,test}/**/*.ts?(x)\"",
     "cs-format": "prettier \"{src,test}/**/*.ts?(x)\" --write",
     "lint": "eslint src test",
@@ -59,6 +61,7 @@
     "dts-cli": "^1.6.3",
     "eslint": "^8.33.0",
     "framer-motion": "^5.6.0",
+    "npm-run-all": "^4.1.5",
     "postcss": "^8.4.21",
     "postcss-import": "^15.1.0",
     "react": "^18.2.0",

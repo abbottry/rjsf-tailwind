@@ -1,7 +1,7 @@
 import { withTheme } from '@rjsf/core';
 import React, { useState } from 'react';
 import { PlusIcon, ChevronRightIcon, ArrowSmallUpIcon, ArrowSmallDownIcon, XMarkIcon } from '@heroicons/react/20/solid';
-import { getUiOptions, getTemplate, getInputProps, ariaDescribedByIds, examplesId, titleId, descriptionId, canExpand, getSubmitButtonOptions, ADDITIONAL_PROPERTY_FLAG, enumOptionsIndexForValue, enumOptionsValueForIndex } from '@rjsf/utils';
+import { getUiOptions, getTemplate, getInputProps, ariaDescribedByIds, examplesId, errorId, titleId, descriptionId, canExpand, getSubmitButtonOptions, ADDITIONAL_PROPERTY_FLAG, enumOptionsIndexForValue, enumOptionsValueForIndex } from '@rjsf/utils';
 import classnames from 'classnames';
 
 function _extends() {
@@ -127,7 +127,10 @@ function ArrayFieldItemTemplate(props) {
   return React.createElement("div", {
     className: className + " mb-4"
   }, React.createElement("div", {
-    className: "flex items-center w-full p-3 py-2.5 rounded text-sm text-left text-slate-700 font-medium bg-slate-100 cursor-pointer",
+    className: classnames("flex items-center w-full p-3 py-2.5 rounded text-sm text-left text-slate-700 font-medium cursor-pointer", {
+      "bg-slate-100": !hasToolbar,
+      "border border-slate-200": hasToolbar
+    }),
     onClick: function onClick() {
       return setIsOpen(function (isOpen) {
         return !isOpen;
@@ -241,6 +244,31 @@ function DescriptionField(_ref) {
   return null;
 }
 
+/** The `FieldErrorTemplate` component renders the errors local to the particular field
+ *
+ * @param props - The `FieldErrorProps` for the errors being rendered
+ */
+function FieldErrorTemplate(props) {
+  var _props$errors = props.errors,
+    errors = _props$errors === void 0 ? [] : _props$errors,
+    idSchema = props.idSchema;
+  if (errors.length === 0) {
+    return null;
+  }
+  var id = errorId(idSchema);
+  return React.createElement("div", null, React.createElement("ul", {
+    id: id,
+    className: "error-detail bs-callout bs-callout-info"
+  }, errors.filter(function (elem) {
+    return !!elem;
+  }).map(function (error, index) {
+    return React.createElement("li", {
+      className: "text-red-700 text-sm",
+      key: index
+    }, error);
+  })));
+}
+
 function FieldTemplate(_ref) {
   var id = _ref.id,
     children = _ref.children,
@@ -282,7 +310,7 @@ function FieldTemplate(_ref) {
     schema: schema,
     uiSchema: uiSchema,
     registry: registry
-  }, React.createElement(React.Fragment, null, displayLabel && React.createElement("label", {
+  }, React.createElement(React.Fragment, null, displayLabel && label !== " " && React.createElement("label", {
     htmlFor: id,
     className: classnames("block mb-2 text-sm font-medium", {
       "text-red-700": rawErrors.length > 0,
@@ -400,7 +428,9 @@ function TitleField(_ref) {
   return React.createElement("div", {
     id: id,
     className: "mb-4"
-  }, React.createElement("h5", null, uiOptions.title || title));
+  }, React.createElement("h5", {
+    className: "block mb-2 text-sm font-medium"
+  }, uiOptions.title || title));
 }
 
 function WrapIfAdditionalTemplate(_ref) {
@@ -476,6 +506,7 @@ function generateTemplates() {
       SubmitButton: SubmitButton
     },
     DescriptionFieldTemplate: DescriptionField,
+    FieldErrorTemplate: FieldErrorTemplate,
     FieldTemplate: FieldTemplate,
     ObjectFieldTemplate: ObjectFieldTemplate,
     TitleFieldTemplate: TitleField,

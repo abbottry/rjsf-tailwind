@@ -60,7 +60,7 @@ export default function FieldTemplate<
       registry={registry}
     >
       <>
-        {displayLabel && (
+        {displayLabel && label !== " " && (
           <label
             htmlFor={id}
             className={classnames("block mb-2 text-sm font-medium", {

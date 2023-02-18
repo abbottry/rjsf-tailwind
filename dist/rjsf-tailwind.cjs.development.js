@@ -136,7 +136,10 @@ function ArrayFieldItemTemplate(props) {
   return React__default["default"].createElement("div", {
     className: className + " mb-4"
   }, React__default["default"].createElement("div", {
-    className: "flex items-center w-full p-3 py-2.5 rounded text-sm text-left text-slate-700 font-medium bg-slate-100 cursor-pointer",
+    className: classnames__default["default"]("flex items-center w-full p-3 py-2.5 rounded text-sm text-left text-slate-700 font-medium cursor-pointer", {
+      "bg-slate-100": !hasToolbar,
+      "border border-slate-200": hasToolbar
+    }),
     onClick: function onClick() {
       return setIsOpen(function (isOpen) {
         return !isOpen;
@@ -250,6 +253,31 @@ function DescriptionField(_ref) {
   return null;
 }
 
+/** The `FieldErrorTemplate` component renders the errors local to the particular field
+ *
+ * @param props - The `FieldErrorProps` for the errors being rendered
+ */
+function FieldErrorTemplate(props) {
+  var _props$errors = props.errors,
+    errors = _props$errors === void 0 ? [] : _props$errors,
+    idSchema = props.idSchema;
+  if (errors.length === 0) {
+    return null;
+  }
+  var id = utils.errorId(idSchema);
+  return React__default["default"].createElement("div", null, React__default["default"].createElement("ul", {
+    id: id,
+    className: "error-detail bs-callout bs-callout-info"
+  }, errors.filter(function (elem) {
+    return !!elem;
+  }).map(function (error, index) {
+    return React__default["default"].createElement("li", {
+      className: "text-red-700 text-sm",
+      key: index
+    }, error);
+  })));
+}
+
 function FieldTemplate(_ref) {
   var id = _ref.id,
     children = _ref.children,
@@ -291,7 +319,7 @@ function FieldTemplate(_ref) {
     schema: schema,
     uiSchema: uiSchema,
     registry: registry
-  }, React__default["default"].createElement(React__default["default"].Fragment, null, displayLabel && React__default["default"].createElement("label", {
+  }, React__default["default"].createElement(React__default["default"].Fragment, null, displayLabel && label !== " " && React__default["default"].createElement("label", {
     htmlFor: id,
     className: classnames__default["default"]("block mb-2 text-sm font-medium", {
       "text-red-700": rawErrors.length > 0,
@@ -409,7 +437,9 @@ function TitleField(_ref) {
   return React__default["default"].createElement("div", {
     id: id,
     className: "mb-4"
-  }, React__default["default"].createElement("h5", null, uiOptions.title || title));
+  }, React__default["default"].createElement("h5", {
+    className: "block mb-2 text-sm font-medium"
+  }, uiOptions.title || title));
 }
 
 function WrapIfAdditionalTemplate(_ref) {
@@ -485,6 +515,7 @@ function generateTemplates() {
       SubmitButton: SubmitButton
     },
     DescriptionFieldTemplate: DescriptionField,
+    FieldErrorTemplate: FieldErrorTemplate,
     FieldTemplate: FieldTemplate,
     ObjectFieldTemplate: ObjectFieldTemplate,
     TitleFieldTemplate: TitleField,
