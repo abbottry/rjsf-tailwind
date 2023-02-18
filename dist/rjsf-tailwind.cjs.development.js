@@ -157,7 +157,7 @@ function ArrayFieldItemTemplate(props) {
   }, React__default["default"].createElement("div", {
     className: "px-2.5 pt-5"
   }, children), hasToolbar && React__default["default"].createElement("div", {
-    className: "absolute top-[-40px] right-[-27px]"
+    className: "absolute top-[-42px] right-[-39px]"
   }, React__default["default"].createElement("div", {
     className: "btn-group"
   }, (hasMoveUp || hasMoveDown) && React__default["default"].createElement(MoveUpButton, {
@@ -221,8 +221,9 @@ function BaseInputTemplate(_ref) {
     required: required,
     disabled: disabled,
     readOnly: readonly,
-    className: classnames__default["default"]("mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-600 focus:ring focus:ring-indigo-200 focus:ring-opacity-50", {
-      "is-invalid": rawErrors.length > 0
+    className: classnames__default["default"]("mt-1 block w-full text-[15px] rounded-md border border-slate-300 shadow-sm focus:border-indigo-600 focus:ring focus:ring-indigo-200 focus:ring-opacity-50", {
+      "is-invalid": rawErrors.length > 0,
+      "file:mr-3 file:font-medium file:text-sm file:border-none file:bg-slate-200 file:py-1 file:px-3 file:rounded-md file:cursor-pointer p-[7px]": type === "file"
     }),
     list: schema.examples ? utils.examplesId(id) : undefined
   }, inputProps, {
@@ -524,6 +525,15 @@ function generateTemplates() {
 }
 var Templates = /*#__PURE__*/generateTemplates();
 
+function FileWidget(props) {
+  var options = props.options,
+    registry = props.registry;
+  var BaseInputTemplate = utils.getTemplate("BaseInputTemplate", registry, options);
+  return React__default["default"].createElement(BaseInputTemplate, _extends({}, props, {
+    type: "file"
+  }));
+}
+
 function SelectWidget(_ref) {
   var schema = _ref.schema,
     id = _ref.id,
@@ -564,7 +574,7 @@ function SelectWidget(_ref) {
     multiple: multiple,
     disabled: disabled || readonly,
     autoFocus: autofocus,
-    className: classnames__default["default"]("mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-600 focus:ring focus:ring-indigo-200 focus:ring-opacity-50", {
+    className: classnames__default["default"]("mt-1 block w-full text-[15px] rounded-md border-slate-300 shadow-sm focus:border-indigo-600 focus:ring focus:ring-indigo-200 focus:ring-opacity-50", {
       "is-invalid": rawErrors.length > 0
     }),
     onBlur: onBlur && function (event) {
@@ -628,7 +638,7 @@ function TextareaWidget(_ref) {
     value: value,
     required: required,
     autoFocus: autofocus,
-    className: "mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-600 focus:ring focus:ring-indigo-200 focus:ring-opacity-50",
+    className: "mt-1 block w-full text-[15px] rounded-md border-slate-300 shadow-sm focus:border-indigo-600 focus:ring focus:ring-indigo-200 focus:ring-opacity-50",
     rows: options.rows || 5,
     onChange: _onChange,
     onBlur: _onBlur,
@@ -639,6 +649,7 @@ function TextareaWidget(_ref) {
 
 function generateWidgets() {
   return {
+    FileWidget: FileWidget,
     SelectWidget: SelectWidget,
     TextareaWidget: TextareaWidget
   };

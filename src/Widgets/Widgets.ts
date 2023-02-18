@@ -1,3 +1,4 @@
+import FileWidget from "../FileWidget/FileWidget";
 import SelectWidget from "../SelectWidget/SelectWidget";
 import TextareaWidget from "../TextareaWidget/TextareaWidget";
 
@@ -14,6 +15,7 @@ export function generateWidgets<
   F extends FormContextType = any
 >(): RegistryWidgetsType<T, S, F> {
   return {
+    FileWidget,
     SelectWidget,
     TextareaWidget
   };

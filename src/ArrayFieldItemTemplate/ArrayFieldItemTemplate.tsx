@@ -57,7 +57,7 @@ export default function ArrayFieldItemTemplate<
           {children}
         </div>
         {hasToolbar && (
-          <div className="absolute top-[-40px] right-[-27px]">
+          <div className="absolute top-[-42px] right-[-39px]">
             <div
               className="btn-group"
             >

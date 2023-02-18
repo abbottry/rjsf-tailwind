@@ -58,8 +58,9 @@ export default function BaseInputTemplate<
         required={required}
         disabled={disabled}
         readOnly={readonly}
-        className={classnames("mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-600 focus:ring focus:ring-indigo-200 focus:ring-opacity-50", {
-          "is-invalid": rawErrors.length > 0
+        className={classnames("mt-1 block w-full text-[15px] rounded-md border border-slate-300 shadow-sm focus:border-indigo-600 focus:ring focus:ring-indigo-200 focus:ring-opacity-50", {
+          "is-invalid": rawErrors.length > 0,
+          "file:mr-3 file:font-medium file:text-sm file:border-none file:bg-slate-200 file:py-1 file:px-3 file:rounded-md file:cursor-pointer p-[7px]": type === "file"
         })}
         list={schema.examples ? examplesId<T>(id) : undefined}
         {...inputProps}

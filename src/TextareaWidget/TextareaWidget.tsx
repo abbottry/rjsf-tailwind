@@ -53,7 +53,7 @@ export default function TextareaWidget<
       value={value}
       required={required}
       autoFocus={autofocus}
-      className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-600 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+      className="mt-1 block w-full text-[15px] rounded-md border-slate-300 shadow-sm focus:border-indigo-600 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
       rows={options.rows || 5}
       onChange={_onChange}
       onBlur={_onBlur}
