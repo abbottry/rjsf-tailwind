@@ -6,14 +6,14 @@ import {
   StrictRJSFSchema,
 } from "@rjsf/utils";
 
-import { ArrowSmallUpIcon, ArrowSmallDownIcon, XMarkIcon } from '@heroicons/react/20/solid';
+import { ArrowSmallUpIcon, ArrowSmallDownIcon, XMarkIcon, TrashIcon } from '@heroicons/react/20/solid';
 
 export default function IconButton<
   T = any,
   S extends StrictRJSFSchema = RJSFSchema,
   F extends FormContextType = any
 >(props: IconButtonProps<T, S, F>) {
-  const { icon, iconType, className, uiSchema, registry, ...otherProps } =
+  const { icon, iconType, className, registry, ...otherProps } =
     props;
   return (
     <button {...otherProps} className="block rounded-[5px] border border-slate-200 p-0.5 mb-1 cursor-pointer">
@@ -48,10 +48,9 @@ export function RemoveButton<
   F extends FormContextType = any
 >(props: IconButtonProps<T, S, F>) {
   return (
-    <IconButton
-      title="Remove"
-      {...props}
-      icon="remove"
-    />
+    <button {...props} className="flex items-center text-[13px] text-red-700 border border-red-700 rounded-[5px] py-0.5 px-2 hover:bg-red-700 hover:text-white">
+      <TrashIcon className="w-3 h-3 mr-1" />
+      Remove
+    </button>
   );
 }

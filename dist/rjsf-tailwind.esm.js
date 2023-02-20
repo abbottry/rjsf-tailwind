@@ -1,7 +1,9 @@
 import { withTheme } from '@rjsf/core';
-import React, { useState } from 'react';
-import { PlusIcon, ChevronRightIcon, ArrowSmallUpIcon, ArrowSmallDownIcon, XMarkIcon } from '@heroicons/react/20/solid';
+import React, { useState, useRef } from 'react';
+import { PlusIcon, ChevronRightIcon, TrashIcon, ArrowSmallUpIcon, ArrowSmallDownIcon, XMarkIcon } from '@heroicons/react/20/solid';
 import { getUiOptions, getTemplate, getInputProps, ariaDescribedByIds, examplesId, errorId, titleId, descriptionId, canExpand, getSubmitButtonOptions, ADDITIONAL_PROPERTY_FLAG, enumOptionsIndexForValue, enumOptionsValueForIndex } from '@rjsf/utils';
+import { DndProvider, useDrop, useDrag } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 import classnames from 'classnames';
 
 function _extends() {
@@ -66,7 +68,9 @@ function ArrayFieldTemplate(props) {
   var ArrayFieldTitleTemplate = getTemplate("ArrayFieldTitleTemplate", registry, uiOptions);
   // Button templates are not overridden in the uiSchema
   var AddButton = registry.templates.ButtonTemplates.AddButton;
-  return React.createElement("fieldset", {
+  return React.createElement(DndProvider, {
+    backend: HTML5Backend
+  }, React.createElement("fieldset", {
     className: className,
     id: idSchema.$id
   }, React.createElement(ArrayFieldTitleTemplate, {
@@ -96,7 +100,7 @@ function ArrayFieldTemplate(props) {
     disabled: disabled || readonly,
     uiSchema: uiSchema,
     registry: registry
-  }));
+  })));
 }
 
 /** The `ArrayFieldItemTemplate` component is the template used to render an items of an array.
@@ -115,24 +119,92 @@ function ArrayFieldItemTemplate(props) {
     onDropIndexClick = props.onDropIndexClick,
     onReorderClick = props.onReorderClick,
     readonly = props.readonly,
-    registry = props.registry,
-    uiSchema = props.uiSchema;
-  var _registry$templates$B = registry.templates.ButtonTemplates,
-    MoveDownButton = _registry$templates$B.MoveDownButton,
-    MoveUpButton = _registry$templates$B.MoveUpButton,
-    RemoveButton = _registry$templates$B.RemoveButton;
+    registry = props.registry;
+  var RemoveButton = registry.templates.ButtonTemplates.RemoveButton;
   var _useState = useState(false),
     isOpen = _useState[0],
     setIsOpen = _useState[1];
+  var ref = useRef(null);
+  var draggableOptions = {};
+  if (hasMoveUp || hasMoveDown) {
+    var _useDrop = useDrop({
+        accept: 'item',
+        hover: function hover(item, monitor) {
+          var _ref$current;
+          if (!ref.current) {
+            return;
+          }
+          var dragIndex = item.index;
+          var hoverIndex = index;
+          // Don't replace items with themselves
+          if (dragIndex === hoverIndex) {
+            return;
+          }
+          // Determine rectangle on screen
+          var hoverBoundingRect = (_ref$current = ref.current) == null ? void 0 : _ref$current.getBoundingClientRect();
+          // Get vertical middle
+          var hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
+          // Determine mouse position
+          var clientOffset = monitor.getClientOffset();
+          // Get pixels to the top
+          var hoverClientY = clientOffset.y - hoverBoundingRect.top;
+          // Only perform the move when the mouse has crossed half of the items height
+          // When dragging downwards, only move when the cursor is below 50%
+          // When dragging upwards, only move when the cursor is above 50%
+          // Dragging downwards
+          if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) {
+            return;
+          }
+          // Dragging upwards
+          if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
+            return;
+          }
+          // Time to actually perform the action
+          // moveCard(dragIndex, hoverIndex)
+          onReorderClick(dragIndex, hoverIndex)('');
+          // console.log("drag index", dragIndex)
+          // console.log("hover index", hoverIndex)
+          // Note: we're mutating the monitor item here!
+          // Generally it's better to avoid mutations,
+          // but it's good here for the sake of performance
+          // to avoid expensive index searches.
+          item.index = hoverIndex;
+        }
+      }),
+      drop = _useDrop[1];
+    var _useDrag = useDrag({
+        type: 'item',
+        item: function item() {
+          return {
+            index: index
+          };
+        },
+        collect: function collect(monitor) {
+          return {
+            isDragging: monitor.isDragging()
+          };
+        }
+      }),
+      isDragging = _useDrag[0].isDragging,
+      drag = _useDrag[1];
+    var opacity = isDragging ? 0.3 : 1;
+    drag(drop(ref));
+    draggableOptions = {
+      style: {
+        opacity: opacity
+      }
+    };
+  }
   var groupTitle = "Untitled";
   if (children.props.formData) {
     if (children.props.formData.title) {
       groupTitle = children.props.formData.title;
     }
   }
-  return React.createElement("div", {
-    className: className + " mb-4"
-  }, React.createElement("div", {
+  return React.createElement("div", _extends({
+    className: className + " mb-4",
+    ref: ref
+  }, draggableOptions), React.createElement("div", {
     className: classnames("flex items-center w-full p-3 py-2.5 rounded text-sm text-left text-slate-700 font-medium cursor-pointer", {
       "bg-slate-100": !hasToolbar,
       "border border-slate-200": hasToolbar
@@ -154,28 +226,12 @@ function ArrayFieldItemTemplate(props) {
   }, React.createElement("div", {
     className: "px-2.5 pt-5"
   }, children), hasToolbar && React.createElement("div", {
-    className: "absolute top-[-42px] right-[-39px]"
-  }, React.createElement("div", {
-    className: "btn-group"
-  }, (hasMoveUp || hasMoveDown) && React.createElement(MoveUpButton, {
-    className: "w-[18px] h-[18px] text-slate-700",
-    disabled: disabled || readonly || !hasMoveUp,
-    onClick: onReorderClick(index, index - 1),
-    uiSchema: uiSchema,
-    registry: registry
-  }), (hasMoveUp || hasMoveDown) && React.createElement(MoveDownButton, {
-    className: "w-[18px] h-[18px] text-slate-700",
-    disabled: disabled || readonly || !hasMoveDown,
-    onClick: onReorderClick(index, index + 1),
-    uiSchema: uiSchema,
-    registry: registry
-  }), hasRemove && React.createElement(RemoveButton, {
-    className: "w-[18px] h-[18px] text-red-700",
+    className: "ml-3 mb-4"
+  }, hasRemove && React.createElement(RemoveButton, {
     disabled: disabled || readonly,
     onClick: onDropIndexClick(index),
-    uiSchema: uiSchema,
     registry: registry
-  })))));
+  }))));
 }
 
 function BaseInputTemplate(_ref) {
@@ -329,7 +385,7 @@ function FieldTemplate(_ref) {
   }, rawDescription), errors, help));
 }
 
-var _excluded = ["icon", "iconType", "className", "uiSchema", "registry"];
+var _excluded = ["icon", "iconType", "className", "registry"];
 function IconButton(props) {
   var icon = props.icon,
     className = props.className,
@@ -359,11 +415,11 @@ function MoveUpButton(props) {
   }));
 }
 function RemoveButton(props) {
-  return React.createElement(IconButton, _extends({
-    title: "Remove"
-  }, props, {
-    icon: "remove"
-  }));
+  return React.createElement("button", _extends({}, props, {
+    className: "flex items-center text-[13px] text-red-700 border border-red-700 rounded-[5px] py-0.5 px-2 hover:bg-red-700 hover:text-white"
+  }), React.createElement(TrashIcon, {
+    className: "w-3 h-3 mr-1"
+  }), "Remove");
 }
 
 function ObjectFieldTemplate(_ref) {

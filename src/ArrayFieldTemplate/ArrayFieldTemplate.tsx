@@ -9,6 +9,10 @@ import {
   StrictRJSFSchema,
 } from "@rjsf/utils";
 
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
+
+
 /** The `ArrayFieldTemplate` component is the template used to render all items in an array.
  *
  * @param props - The `ArrayFieldTemplateItemType` props for the component
@@ -55,39 +59,41 @@ export default function ArrayFieldTemplate<
     ButtonTemplates: { AddButton },
   } = registry.templates;
   return (
-    <fieldset className={className} id={idSchema.$id}>
-      <ArrayFieldTitleTemplate
-        idSchema={idSchema}
-        title={uiOptions.title || title}
-        required={required}
-        schema={schema}
-        uiSchema={uiSchema}
-        registry={registry}
-      />
-      <ArrayFieldDescriptionTemplate
-        idSchema={idSchema}
-        description={uiOptions.description || schema.description}
-        schema={schema}
-        uiSchema={uiSchema}
-        registry={registry}
-      />
-      <div className="row array-item-list">
-        {items &&
-          items.map(
-            ({ key, ...itemProps }: ArrayFieldTemplateItemType<T, S, F>) => (
-              <ArrayFieldItemTemplate key={key} {...itemProps} />
-            )
-          )}
-      </div>
-      {canAdd && (
-        <AddButton
-          className="array-item-add"
-          onClick={onAddClick}
-          disabled={disabled || readonly}
+    <DndProvider backend={HTML5Backend}>
+      <fieldset className={className} id={idSchema.$id}>
+        <ArrayFieldTitleTemplate
+          idSchema={idSchema}
+          title={uiOptions.title || title}
+          required={required}
+          schema={schema}
           uiSchema={uiSchema}
           registry={registry}
         />
-      )}
-    </fieldset>
+        <ArrayFieldDescriptionTemplate
+          idSchema={idSchema}
+          description={uiOptions.description || schema.description}
+          schema={schema}
+          uiSchema={uiSchema}
+          registry={registry}
+        />
+        <div className="row array-item-list">
+          {items &&
+            items.map(
+              ({ key, ...itemProps }: ArrayFieldTemplateItemType<T, S, F>) => (
+                <ArrayFieldItemTemplate key={key} {...itemProps} />
+              )
+            )}
+        </div>
+        {canAdd && (
+          <AddButton
+            className="array-item-add"
+            onClick={onAddClick}
+            disabled={disabled || readonly}
+            uiSchema={uiSchema}
+            registry={registry}
+          />
+        )}
+      </fieldset>
+    </DndProvider>
   );
 }
