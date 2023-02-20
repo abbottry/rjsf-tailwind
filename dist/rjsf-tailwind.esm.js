@@ -124,6 +124,12 @@ function ArrayFieldItemTemplate(props) {
   var _useState = useState(false),
     isOpen = _useState[0],
     setIsOpen = _useState[1];
+  var groupTitle = "Untitled";
+  if (children.props.formData) {
+    if (children.props.formData.title) {
+      groupTitle = children.props.formData.title;
+    }
+  }
   return React.createElement("div", {
     className: className + " mb-4"
   }, React.createElement("div", {
@@ -138,7 +144,7 @@ function ArrayFieldItemTemplate(props) {
     }
   }, React.createElement("div", {
     className: "grow line-clamp-1"
-  }, children.props.formData ? children.props.formData.title : "Untitled"), React.createElement(ChevronRightIcon, {
+  }, groupTitle), React.createElement(ChevronRightIcon, {
     className: "h-5 w-5 " + (isOpen ? 'rotate-90 transform' : '')
   })), React.createElement("div", {
     className: classnames("relative", {
@@ -214,7 +220,8 @@ function BaseInputTemplate(_ref) {
     readOnly: readonly,
     className: classnames("mt-1 block w-full text-[15px] rounded-md border border-slate-300 shadow-sm focus:border-indigo-600 focus:ring focus:ring-indigo-200 focus:ring-opacity-50", {
       "is-invalid": rawErrors.length > 0,
-      "file:mr-3 file:font-medium file:text-sm file:border-none file:bg-slate-200 file:py-1 file:px-3 file:rounded-md file:cursor-pointer p-[7px]": type === "file"
+      "file:mr-3 file:font-medium file:text-sm file:border-none file:bg-slate-200 file:py-1 file:px-3 file:rounded-md file:cursor-pointer p-[7px]": type === "file",
+      "bg-white h-[42px] p-[5px] cursor-pointer": type === "color"
     }),
     list: schema.examples ? examplesId(id) : undefined
   }, inputProps, {

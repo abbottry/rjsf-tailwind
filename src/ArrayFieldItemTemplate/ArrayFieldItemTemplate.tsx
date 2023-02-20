@@ -37,6 +37,13 @@ export default function ArrayFieldItemTemplate<
 
   const [isOpen, setIsOpen] = useState(false);
 
+  let groupTitle = "Untitled";
+  if (children.props.formData) {
+    if (children.props.formData.title) {
+      groupTitle = children.props.formData.title;
+    }
+  }
+
   return (
     <div className={`${className} mb-4`}>
       <div 
@@ -46,7 +53,9 @@ export default function ArrayFieldItemTemplate<
         })}
         onClick={() => setIsOpen((isOpen) => !isOpen)}
       >
-        <div className="grow line-clamp-1">{children.props.formData ? children.props.formData.title : "Untitled"}</div>
+        <div className="grow line-clamp-1">
+          {groupTitle}
+        </div>
         <ChevronRightIcon className={`h-5 w-5 ${isOpen ? 'rotate-90 transform' : ''}`} />
       </div>
       <div className={classnames("relative", {
