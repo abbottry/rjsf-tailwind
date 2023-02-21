@@ -75,10 +75,7 @@ export default function ArrayFieldItemTemplate<
           return;
         }
         // Time to actually perform the action
-        // moveCard(dragIndex, hoverIndex)
         onReorderClick(dragIndex, hoverIndex)('');
-        // console.log("drag index", dragIndex)
-        // console.log("hover index", hoverIndex)
         // Note: we're mutating the monitor item here!
         // Generally it's better to avoid mutations,
         // but it's good here for the sake of performance
@@ -104,7 +101,7 @@ export default function ArrayFieldItemTemplate<
       style: {opacity}
     };
   }
-
+  
   let groupTitle = "Untitled";
   if (children.props.formData) {
     if (children.props.formData.title) {
@@ -117,7 +114,8 @@ export default function ArrayFieldItemTemplate<
       <div 
         className={classnames("flex items-center w-full p-3 py-2.5 rounded text-sm text-left text-slate-700 font-medium cursor-pointer", {
           "bg-slate-100": !hasToolbar,
-          "border border-slate-200": hasToolbar
+          "border border-slate-200": hasToolbar && !isOpen,
+          "border border-slate-300": hasToolbar && isOpen
         })}
         onClick={() => setIsOpen((isOpen) => !isOpen)}
       >

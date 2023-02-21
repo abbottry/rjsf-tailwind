@@ -1,7 +1,7 @@
 import { withTheme } from '@rjsf/core';
 import React, { useState, useRef } from 'react';
 import { PlusIcon, ChevronRightIcon, TrashIcon, ArrowSmallUpIcon, ArrowSmallDownIcon, XMarkIcon } from '@heroicons/react/20/solid';
-import { getUiOptions, getTemplate, getInputProps, ariaDescribedByIds, examplesId, errorId, titleId, descriptionId, canExpand, getSubmitButtonOptions, ADDITIONAL_PROPERTY_FLAG, enumOptionsIndexForValue, enumOptionsValueForIndex } from '@rjsf/utils';
+import { getUiOptions, getTemplate, getInputProps, ariaDescribedByIds, examplesId, errorId, titleId, descriptionId, getSubmitButtonOptions, ADDITIONAL_PROPERTY_FLAG, enumOptionsIndexForValue, enumOptionsValueForIndex } from '@rjsf/utils';
 import { DndProvider, useDrop, useDrag } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import classnames from 'classnames';
@@ -160,10 +160,7 @@ function ArrayFieldItemTemplate(props) {
             return;
           }
           // Time to actually perform the action
-          // moveCard(dragIndex, hoverIndex)
           onReorderClick(dragIndex, hoverIndex)('');
-          // console.log("drag index", dragIndex)
-          // console.log("hover index", hoverIndex)
           // Note: we're mutating the monitor item here!
           // Generally it's better to avoid mutations,
           // but it's good here for the sake of performance
@@ -207,7 +204,8 @@ function ArrayFieldItemTemplate(props) {
   }, draggableOptions), React.createElement("div", {
     className: classnames("flex items-center w-full p-3 py-2.5 rounded text-sm text-left text-slate-700 font-medium cursor-pointer", {
       "bg-slate-100": !hasToolbar,
-      "border border-slate-200": hasToolbar
+      "border border-slate-200": hasToolbar && !isOpen,
+      "border border-slate-300": hasToolbar && isOpen
     }),
     onClick: function onClick() {
       return setIsOpen(function (isOpen) {
@@ -274,10 +272,11 @@ function BaseInputTemplate(_ref) {
     required: required,
     disabled: disabled,
     readOnly: readonly,
-    className: classnames("mt-1 block w-full text-[15px] rounded-md border border-slate-300 shadow-sm focus:border-indigo-600 focus:ring focus:ring-indigo-200 focus:ring-opacity-50", {
+    className: classnames("mt-1 block w-full text-[15px]", {
       "is-invalid": rawErrors.length > 0,
       "file:mr-3 file:font-medium file:text-sm file:border-none file:bg-slate-200 file:py-1 file:px-3 file:rounded-md file:cursor-pointer p-[7px]": type === "file",
-      "bg-white h-[42px] p-[5px] cursor-pointer": type === "color"
+      "bg-white h-[42px] p-[5px] cursor-pointer": type === "color",
+      "rounded-md border border-slate-300 shadow-sm focus:border-indigo-600 focus:ring focus:ring-indigo-200 focus:ring-opacity-50": type !== "range"
     }),
     list: schema.examples ? examplesId(id) : undefined
   }, inputProps, {
@@ -422,24 +421,52 @@ function RemoveButton(props) {
   }), "Remove");
 }
 
-function ObjectFieldTemplate(_ref) {
-  var description = _ref.description,
-    title = _ref.title,
-    properties = _ref.properties,
-    required = _ref.required,
-    uiSchema = _ref.uiSchema,
-    idSchema = _ref.idSchema,
-    schema = _ref.schema,
-    formData = _ref.formData,
-    onAddClick = _ref.onAddClick,
-    disabled = _ref.disabled,
-    readonly = _ref.readonly,
-    registry = _ref.registry;
+function TabsTemplate(props) {
+  var _useState = useState(props.properties[0].name),
+    activeTab = _useState[0],
+    setActiveTab = _useState[1];
+  return React.createElement(React.Fragment, null, React.createElement("div", {
+    className: "flex items-center justify-between bg-slate-100 p-1 rounded-md mb-6"
+  }, props.properties.map(function (p, id) {
+    return React.createElement("button", {
+      key: id,
+      type: "button",
+      onClick: function onClick() {
+        return setActiveTab(p.name);
+      },
+      className: classnames("text-sm py-2 w-1/3 rounded-md capitalize", {
+        "bg-white font-medium": activeTab === p.name
+      })
+    }, p.name);
+  })), props.properties.map(function (p, id) {
+    return React.createElement("div", {
+      key: id,
+      title: p.name,
+      className: classnames({
+        "hidden": activeTab !== p.name
+      })
+    }, p.children.map(function (element, index) {
+      return React.createElement("div", {
+        key: index,
+        className: "mb-5"
+      }, element);
+    }));
+  }));
+}
+
+function ObjectFieldTemplate(props) {
+  var description = props.description,
+    title = props.title,
+    properties = props.properties,
+    required = props.required,
+    uiSchema = props.uiSchema,
+    idSchema = props.idSchema,
+    schema = props.schema,
+    registry = props.registry;
   var uiOptions = getUiOptions(uiSchema);
   var TitleFieldTemplate = getTemplate("TitleFieldTemplate", registry, uiOptions);
   var DescriptionFieldTemplate = getTemplate("DescriptionFieldTemplate", registry, uiOptions);
   // Button templates are not overridden in the uiSchema
-  var AddButton = registry.templates.ButtonTemplates.AddButton;
   return React.createElement(React.Fragment, null, (uiOptions.title || title) && React.createElement(TitleFieldTemplate, {
     id: titleId(idSchema),
     title: uiOptions.title || title,
@@ -455,20 +482,70 @@ function ObjectFieldTemplate(_ref) {
     registry: registry
   }), React.createElement("div", {
     className: "p-0"
-  }, properties.map(function (element, index) {
-    return React.createElement("div", {
-      key: index,
-      className: element.hidden ? "d-none" : "mb-5"
-    }, element.content);
-  }), canExpand(schema, uiSchema, formData) ? React.createElement("div", {
-    className: "py-4"
-  }, React.createElement(AddButton, {
-    onClick: onAddClick(schema),
-    disabled: disabled || readonly,
-    className: "object-property-expand",
-    uiSchema: uiSchema,
-    registry: registry
-  })) : null));
+  }, tabGroups({
+    properties: properties,
+    groups: uiSchema["ui:tabs"],
+    props: props
+  })));
+}
+var REST = /*#__PURE__*/Symbol("REST");
+var EXTRANEOUS = /*#__PURE__*/Symbol("EXTRANEOUS");
+function tabGroups(_ref) {
+  var properties = _ref.properties,
+    groups = _ref.groups,
+    props = _ref.props;
+  if (!Array.isArray(groups)) {
+    return React.createElement(React.Fragment, null, properties.map(function (element, index) {
+      return React.createElement("div", {
+        key: index,
+        className: element.hidden ? "hidden" : "mb-5"
+      }, element.content);
+    }));
+  }
+  var mapped = groups.map(function (g, key) {
+    if (typeof g === "string") {
+      var found = properties.filter(function (p) {
+        return p.name === g;
+      });
+      if (found.length === 1) {
+        var el = found[0];
+        return el.content;
+      }
+      return EXTRANEOUS;
+    } else if (typeof g === "object") {
+      var _properties = Object.keys(g).reduce(function (acc, key) {
+        var field = g[key];
+        if (key.startsWith("ui:")) return acc;
+        if (!Array.isArray(field)) return acc;
+        return [].concat(acc, [{
+          name: key,
+          children: tabGroups({
+            properties: properties,
+            props: props,
+            groups: field
+          })
+        }]);
+      }, []);
+      return React.createElement(TabsTemplate, {
+        key: key,
+        properties: _properties
+      });
+    }
+    throw new Error("Invalid object type: " + typeof g + " " + g);
+  });
+  var remainder = mapped.filter(function (m) {
+    return m === REST;
+  });
+  if (remainder.length > 0) {
+    throw new Error("Remainder fields not supported");
+  }
+  var extraneous = mapped.filter(function (m) {
+    return m === EXTRANEOUS;
+  });
+  if (extraneous.length) {
+    throw new Error("Extranoues fields" + extraneous);
+  }
+  return mapped;
 }
 
 function SubmitButton(props) {
