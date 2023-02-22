@@ -9,6 +9,7 @@ var utils = require('@rjsf/utils');
 var reactDnd = require('react-dnd');
 var reactDndHtml5Backend = require('react-dnd-html5-backend');
 var classnames = require('classnames');
+var fontManager = require('@samuelmeuli/font-manager');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
@@ -28,6 +29,18 @@ function _extends() {
     return target;
   };
   return _extends.apply(this, arguments);
+}
+function _inheritsLoose(subClass, superClass) {
+  subClass.prototype = Object.create(superClass.prototype);
+  subClass.prototype.constructor = subClass;
+  _setPrototypeOf(subClass, superClass);
+}
+function _setPrototypeOf(o, p) {
+  _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf(o, p) {
+    o.__proto__ = p;
+    return o;
+  };
+  return _setPrototypeOf(o, p);
 }
 function _objectWithoutPropertiesLoose(source, excluded) {
   if (source == null) return {};
@@ -674,6 +687,219 @@ function FileWidget(props) {
   }));
 }
 
+/**
+ * Return the fontId based on the provided font family
+ */
+function getFontId(fontFamily) {
+  return fontFamily.replace(/\s+/g, "-").toLowerCase();
+}
+var FontPicker = /*#__PURE__*/function (_PureComponent) {
+  _inheritsLoose(FontPicker, _PureComponent);
+  // Instance of the FontManager class used for managing, downloading and applying fonts
+
+  function FontPicker(props) {
+    var _this;
+    _this = _PureComponent.call(this, props) || this;
+    _this.fontManager = void 0;
+    _this.state = {
+      expanded: false,
+      loadingStatus: "loading"
+    };
+    _this.componentDidMount = function () {
+      // Generate font list
+      _this.fontManager.init().then(function () {
+        _this.setState({
+          loadingStatus: "finished"
+        });
+      })["catch"](function (err) {
+        // On error: Log error message
+        _this.setState({
+          loadingStatus: "error"
+        });
+        console.error("Error trying to fetch the list of available fonts");
+        console.error(err);
+      });
+    };
+    _this.componentDidUpdate = function (prevProps) {
+      var _this$props = _this.props,
+        activeFontFamily = _this$props.activeFontFamily,
+        onChange = _this$props.onChange;
+      // If active font prop has changed: Update font family in font manager and component state
+      if (activeFontFamily !== prevProps.activeFontFamily) {
+        _this.setActiveFontFamily(activeFontFamily);
+      }
+      // If onChange prop has changed: Update onChange function in font manager
+      if (onChange !== prevProps.onChange) {
+        _this.fontManager.setOnChange(onChange);
+      }
+    };
+    _this.onClose = function (e) {
+      var targetEl = e.target; // Clicked element
+      var fontPickerEl = document.getElementById("font-picker" + _this.fontManager.selectorSuffix);
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        if (targetEl === fontPickerEl) {
+          // Click inside font picker: Exit
+          return;
+        }
+        if (targetEl.parentNode) {
+          // Click outside font picker: Move up the DOM
+          targetEl = targetEl.parentNode;
+        } else {
+          // DOM root is reached: Toggle picker, exit
+          _this.toggleExpanded();
+          return;
+        }
+      }
+    };
+    _this.onSelection = function (e) {
+      var target = e.target;
+      var activeFontFamily = target.textContent;
+      if (!activeFontFamily) {
+        throw Error("Missing font family in clicked font button");
+      }
+      _this.setActiveFontFamily(activeFontFamily);
+      _this.toggleExpanded();
+    };
+    _this.setActiveFontFamily = function (activeFontFamily) {
+      _this.fontManager.setActiveFont(activeFontFamily);
+    };
+    _this.generateFontList = function (fonts) {
+      var activeFontFamily = _this.props.activeFontFamily;
+      var _this$state = _this.state,
+        loadingStatus = _this$state.loadingStatus,
+        expanded = _this$state.expanded;
+      if (loadingStatus !== "finished") {
+        return React__default["default"].createElement("div", null);
+      }
+      return React__default["default"].createElement("ul", {
+        className: classnames__default["default"]("font-list !bg-white !rounded-md !border !border-slate-300 !shadow-sm !top-12", {
+          "hidden": !expanded
+        })
+      }, fonts.map(function (font) {
+        var isActive = font.family === activeFontFamily;
+        var fontId = getFontId(font.family);
+        return React__default["default"].createElement("li", {
+          key: fontId,
+          className: "font-list-item"
+        }, React__default["default"].createElement("button", {
+          type: "button",
+          id: "font-button-" + fontId + _this.fontManager.selectorSuffix,
+          className: classnames__default["default"]("font-button !text-[15px] hover:!bg-slate-100", {
+            "!bg-slate-200": isActive
+          }),
+          onClick: _this.onSelection,
+          onKeyPress: _this.onSelection
+        }, font.family));
+      }));
+    };
+    _this.toggleExpanded = function () {
+      var expanded = _this.state.expanded;
+      if (expanded) {
+        _this.setState({
+          expanded: false
+        });
+        document.removeEventListener("click", _this.onClose);
+      } else {
+        _this.setState({
+          expanded: true
+        });
+        document.addEventListener("click", _this.onClose);
+      }
+    };
+    _this.render = function () {
+      var _this$props2 = _this.props,
+        activeFontFamily = _this$props2.activeFontFamily,
+        sort = _this$props2.sort;
+      var _this$state2 = _this.state,
+        expanded = _this$state2.expanded,
+        loadingStatus = _this$state2.loadingStatus;
+      console.log(loadingStatus);
+      // Extract and sort font list
+      var fonts = Array.from(_this.fontManager.getFonts().values());
+      if (sort === "alphabet") {
+        fonts.sort(function (font1, font2) {
+          return font1.family.localeCompare(font2.family);
+        });
+      }
+      // Render font picker button and attach font list to it
+      return React__default["default"].createElement("div", {
+        id: "font-picker" + _this.fontManager.selectorSuffix,
+        className: classnames__default["default"]("!w-full !bg-transparent !rounded-md !border !border-slate-300 !shadow-sm", {
+          "expanded": expanded
+        })
+      }, React__default["default"].createElement("button", {
+        type: "button",
+        className: "dropdown-button !h-[42px] !bg-white !rounded-md focus:border-indigo-600 focus:ring focus:ring-indigo-200 focus:ring-opacity-50",
+        onClick: _this.toggleExpanded,
+        onKeyPress: _this.toggleExpanded
+      }, React__default["default"].createElement("p", {
+        className: "dropdown-font-family"
+      }, activeFontFamily), React__default["default"].createElement("p", null, React__default["default"].createElement(solid.ChevronDownIcon, {
+        className: "h-5 w-5 " + (expanded ? 'rotate-180 transform' : '')
+      }))), loadingStatus === "finished" && _this.generateFontList(fonts));
+    };
+    var _this$props3 = _this.props,
+      apiKey = _this$props3.apiKey,
+      _activeFontFamily = _this$props3.activeFontFamily,
+      pickerId = _this$props3.pickerId,
+      families = _this$props3.families,
+      categories = _this$props3.categories,
+      scripts = _this$props3.scripts,
+      variants = _this$props3.variants,
+      filter = _this$props3.filter,
+      limit = _this$props3.limit,
+      _sort = _this$props3.sort,
+      _onChange = _this$props3.onChange;
+    var options = {
+      pickerId: pickerId,
+      families: families,
+      categories: categories,
+      scripts: scripts,
+      variants: variants,
+      filter: filter,
+      limit: limit,
+      sort: _sort
+    };
+    // Initialize FontManager object
+    _this.fontManager = new fontManager.FontManager(apiKey, _activeFontFamily, options, _onChange);
+    return _this;
+  }
+  return FontPicker;
+}(React.PureComponent);
+FontPicker.defaultProps = {
+  activeFontFamily: fontManager.FONT_FAMILY_DEFAULT,
+  onChange: function onChange() {},
+  pickerId: fontManager.OPTIONS_DEFAULTS.pickerId,
+  families: fontManager.OPTIONS_DEFAULTS.families,
+  categories: fontManager.OPTIONS_DEFAULTS.categories,
+  scripts: fontManager.OPTIONS_DEFAULTS.scripts,
+  variants: fontManager.OPTIONS_DEFAULTS.variants,
+  filter: fontManager.OPTIONS_DEFAULTS.filter,
+  limit: fontManager.OPTIONS_DEFAULTS.limit,
+  sort: fontManager.OPTIONS_DEFAULTS.sort
+};
+
+function FontsWidget(props) {
+  var _onChange = props.onChange,
+    value = props.value,
+    id = props.id;
+  var _useState = React.useState(value || "Inter"),
+    activeFont = _useState[0],
+    setActiveFont = _useState[1];
+  var pickerId = id.replace(/[^a-z0-9]+/gi, "");
+  return React__default["default"].createElement(React__default["default"].Fragment, null, React__default["default"].createElement(FontPicker, {
+    apiKey: "AIzaSyD8KNrMxpVkc3bxqamNlkN4LZp6kqohlS8",
+    activeFontFamily: activeFont,
+    pickerId: pickerId,
+    sort: "popularity",
+    onChange: function onChange(nextFont) {
+      setActiveFont(nextFont.family);
+      _onChange(nextFont.family || undefined);
+    }
+  }));
+}
+
 function SelectWidget(_ref) {
   var schema = _ref.schema,
     id = _ref.id,
@@ -790,6 +1016,7 @@ function TextareaWidget(_ref) {
 function generateWidgets() {
   return {
     FileWidget: FileWidget,
+    FontsWidget: FontsWidget,
     SelectWidget: SelectWidget,
     TextareaWidget: TextareaWidget
   };

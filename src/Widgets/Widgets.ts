@@ -1,4 +1,5 @@
 import FileWidget from "../FileWidget/FileWidget";
+import FontsWidget from "../FontsWidget/FontsWidget";
 import SelectWidget from "../SelectWidget/SelectWidget";
 import TextareaWidget from "../TextareaWidget/TextareaWidget";
 
@@ -16,6 +17,7 @@ export function generateWidgets<
 >(): RegistryWidgetsType<T, S, F> {
   return {
     FileWidget,
+    FontsWidget,
     SelectWidget,
     TextareaWidget
   };
